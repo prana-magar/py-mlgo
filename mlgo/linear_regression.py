@@ -1,6 +1,7 @@
 # TODO
-
-
+import numpy as np
+from numpy.linalg import inv
+from random import randint, random
 class LinearRegressionUni:
     """
     Linear Regression for univariable problems.
@@ -189,16 +190,87 @@ class LinearRegressionMulti:
             prediction.append(self.product_list(self.thetas,added_bias))
         return prediction
 
+class LinearRegressionNormEq:
+    """
+    uses Normal equation to solve for theta instead of gradient descent
+    """
+    def __init__(self):
+        self.thetas = []
+        self.trainX = list()
+        self.trainY = list()
+
+    def product_list(self,lst1,lst2):
+        """
+        returns products element wise
+        :param lst1:
+        :param lst2:
+        :return:
+        """
+        fsum = 0
+        for x1,x2  in zip(lst1,lst2):
+            fsum += x1 * x2
+        return fsum
+
+
+    def __add_bias(self,trainX):
+        """
+        adds X0 or bias to the feature list provided
+        :param trainX:
+        :return:
+        """
+        final_lst = []
+        for row in trainX:
+            temp_list =[1]
+            temp_list.extend(row)
+            final_lst.append(temp_list)
+        return final_lst
+
+
+    def train(self, trainX, trainY, epoch, learning_rate):
+        """
+        trains the model according to given training data
+        :param trainX:
+        :param trainY:
+        :return:
+        """
+        if type(trainX) != type([[]]) or type(trainY) != type([]):
+            print("please pass both as list")
+            return False
+
+        self.trainX = np.array(self.__add_bias(trainX))
+        self.trainY = np.array(trainY)
+        trans_part =np.transpose(self.trainX)
+        print trans_part
+        print self.trainX
+        inv_part = inv(np.dot(trans_part,self.trainX))
+        self.thetas = np.dot(np.dot(inv_part,np.transpose(self.trainX)),self.trainY)
+        print self.thetas
+
+
+    def predict(self, testX):
+        """
+        predicts the target class for given list of features
+        :param testX:
+        :return:
+        """
+        prediction = []
+        for feature in testX:
+            added_bias = [1]
+            added_bias.extend(feature)
+            prediction.append(self.product_list(self.thetas,added_bias))
+        return prediction
+
+
 
 
 if __name__ == '__main__':
-    from random import randint, random
 
-    lr = LinearRegressionMulti()
+
+    lr = LinearRegressionNormEq()
     trainX = [[randint(0, 10),randint(0,10)] for i in range(100)]
     trainY = []
     for row in trainX:
-        y  =  5000+( 800 * row[0])+(500* row[1])
+        y  =  -900+( 8 * row[0])+(556* row[1])
         trainY.append(y)
 
     lr.train(trainX,trainY,100000,0.0005)
